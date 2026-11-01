@@ -1,0 +1,24 @@
+---
+description: After Effects MCP project structure and conventions
+alwaysApply: true
+---
+
+# Project structure
+
+This repo is After Effects MCP: an AEGP bridge plugin, an MCP server for Claude Code, and one CEP status panel. See `ARCHITECTURE.md` for details.
+
+```
+aegp/        AE MCP Bridge (C++, After Effects SDK) — build.sh, test/run.sh
+engine/      engine.jsx (ExtendScript ES3) + vocabulary.js (op schema/catalog)
+mcp/         server.js (protocol, bridge connection) + tools.js (hot-reloadable tools)
+panel/       CEP panel "AE MCP" — index.html, app.js, panel.jsx
+shared/      bridge-client.js (used by mcp + panel), CSInterface.js (downloaded, not committed)
+CSXS/        manifest.xml — single extension com.ae.tools.mcp
+scripts/     setup, deploy, install-aegp, download-cep, enable-debug
+```
+
+## Conventions
+- There are no feature panels. New capability goes in as an op: `vocabulary.js` + `describeOp` + `applyOne` in `engine.jsx`.
+- The panel and the server both talk to the bridge through `shared/bridge-client.js`. Keep that file plain CommonJS/ES5-ish so it loads in CEP's Node.
+- The bridge only calls AE APIs on the main thread (the idle hook). The network thread may call only `AEGP_CauseIdleRoutinesToBeCalled`.
+- After changing bridge code, run `npm run test-bridge` before `npm run install-aegp`.

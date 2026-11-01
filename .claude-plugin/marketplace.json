@@ -1,0 +1,11 @@
+{
+  "name": "ae-plugins",
+  "owner": { "name": "Shivam" },
+  "plugins": [
+    {
+      "name": "after-effects",
+      "source": "./",
+      "description": "After Effects MCP tools via the AE MCP Bridge AEGP plugin: read the comp, preview edits, apply them."
+    }
+  ]
+}

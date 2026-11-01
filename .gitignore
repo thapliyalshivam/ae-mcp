@@ -1,0 +1,8 @@
+node_modules/
+shared/CSInterface.js
+aegp/build/
+.DS_Store
+AfterEffectsSDK_*/
+*.log
+.env
+.claude/settings.local.json

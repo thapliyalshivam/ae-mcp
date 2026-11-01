@@ -1,0 +1,18 @@
+{
+  "name": "ae-mcp",
+  "version": "2.0.0",
+  "description": "After Effects MCP: an AEGP bridge plugin, an MCP server for Claude Code, and a CEP status panel",
+  "private": true,
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "download-cep": "node scripts/download-cep.js",
+    "deploy": "node scripts/deploy.js",
+    "enable-debug": "node scripts/enable-debug.js",
+    "build-aegp": "aegp/build.sh",
+    "install-aegp": "node scripts/install-aegp.js",
+    "test-bridge": "aegp/test/run.sh"
+  }
+}

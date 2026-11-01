@@ -1,0 +1,11 @@
+{
+  "name": "after-effects",
+  "version": "2.0.0",
+  "description": "Read and edit the active After Effects comp from Claude Code through a fixed op vocabulary (preview before apply, one undo group), via the AE MCP Bridge AEGP plugin.",
+  "mcpServers": {
+    "after-effects": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/server.js"]
+    }
+  }
+}
