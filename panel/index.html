@@ -16,6 +16,7 @@
       --bad: #e0564f;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     body {
       margin: 0;
       padding: 10px;
@@ -64,6 +65,11 @@
     #toast { min-height: 16px; color: var(--muted); margin-bottom: 8px; }
     #toast.err { color: var(--bad); }
     #toast.good { color: var(--ok); }
+    button.block { display: block; width: 100%; margin-top: 8px; }
+    pre {
+      margin: 8px 0 0; padding: 6px; background: #1c1c1c; border-radius: 2px; overflow-x: auto;
+      font: 11px/1.5 Menlo, monospace; user-select: text;
+    }
     .log { max-height: 220px; overflow-y: auto; }
     .log .row { font-size: 11px; }
   </style>
@@ -85,6 +91,14 @@
   <section id="offline" hidden>
     <h2>Bridge offline</h2>
     <div class="hint" id="offline-hint"></div>
+    <button id="btn-install" class="primary block" hidden>Install bridge</button>
+  </section>
+
+  <section id="claude-setup" hidden>
+    <h2>Connect Claude Code</h2>
+    <div class="hint">The After Effects plugin for Claude Code isn't installed. Run this in a terminal, then start <code>claude</code>:</div>
+    <pre id="claude-commands"></pre>
+    <button id="btn-copy" class="block">Copy commands</button>
   </section>
 
   <section>

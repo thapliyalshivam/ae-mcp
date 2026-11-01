@@ -1,0 +1,21 @@
+#!/bin/sh
+# Runs as root after the pkg lays the extension down. Copies the bridge into every installed
+# After Effects, and lets the signed-in user's After Effects load the unsigned panel.
+EXTENSION="/Library/Application Support/Adobe/CEP/extensions/com.ae.tools"
+BUNDLE="AE MCP Bridge.plugin"
+
+for app in "/Applications/Adobe After Effects "*; do
+  [ -d "$app/Plug-ins" ] || continue
+  rm -rf "$app/Plug-ins/$BUNDLE"
+  cp -R "$EXTENSION/native/$BUNDLE" "$app/Plug-ins/$BUNDLE"
+  xattr -dr com.apple.quarantine "$app/Plug-ins/$BUNDLE" 2>/dev/null
+done
+
+user="$(stat -f%Su /dev/console)"
+if [ -n "$user" ] && [ "$user" != "root" ]; then
+  for version in 7 8 9 10 11 12; do
+    sudo -u "$user" defaults write "com.adobe.CSXS.$version" PlayerDebugMode 1
+  done
+fi
+
+exit 0

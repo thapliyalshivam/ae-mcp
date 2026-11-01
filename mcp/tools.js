@@ -88,7 +88,7 @@ async function evalViaOsascript(expression) {
   } catch (e) {
     throw new Error('After Effects ran the script but wrote no reply. Check Settings > Scripting & ' +
       'Expressions > "Allow Scripts to Write Files and Access Network", or install the AE MCP ' +
-      'Bridge plugin (npm run install-aegp in ae-mcp).');
+      'Bridge plugin (Window > Extensions > AE MCP).');
   }
 }
 
@@ -106,7 +106,7 @@ function createTools({ bridge }) {
       raw = await bridge.evalScript(engineSource() + '\n' + expression, label);
     } else if (mode === 'bridge') {
       throw new Error('The AE MCP Bridge is not reachable on 127.0.0.1:' + bridge.port + '. Is After ' +
-        'Effects open, with the plugin installed (npm run install-aegp)?');
+        'Effects open, with the plugin installed (Window > Extensions > AE MCP)?');
     } else {
       lastTransport = 'osascript';
       raw = await evalViaOsascript(expression);

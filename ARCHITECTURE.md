@@ -44,7 +44,7 @@ ae-mcp/
 │   └── CSInterface.js           downloaded by setup, not committed
 ├── CSXS/manifest.xml            the one extension, com.ae.tools.mcp
 ├── .debug                       CEP remote-debug port (8800) for the panel
-└── scripts/                     setup, deploy, install-aegp, download-cep, enable-debug
+└── scripts/                     setup, deploy, install-aegp, download-cep, enable-debug, package
 ```
 
 `ae-mcp/` is the repo root. `.claude-plugin/marketplace.json` is the local marketplace that installs this plugin as `after-effects@ae-plugins`. The AE SDK sits in `AfterEffectsSDK_25.6_61_mac/`, which is git-ignored. `build.sh` and `test/run.sh` read `Headers/`, `Headers/SP`, `Util/` and `Resources/` from it, and compile `Util/AEGP_SuiteHandler.cpp` and `Util/MissingSuiteError.cpp` in. `AE_SDK` points them to a different SDK `Examples` folder.
@@ -96,6 +96,14 @@ The panel (**Window > Extensions > AE MCP**) is a client of the bridge like the 
 - **Reload MCP** sends `broadcast {event:"reload", to:"mcp"}`.
 - **Test round-trip** times a tiny eval.
 - **Reconnect** reopens the panel's own connection.
+
+It also handles first-run setup. If `native/` holds a bundled bridge and no bridge is installed, **Install bridge** copies it into the running AE's `Plug-ins` folder through macOS's administrator prompt. If `after-effects@ae-plugins` isn't in `~/.claude/plugins/installed_plugins.json`, no session is connected, and the extension holds `claude-plugin/`, the panel shows the commands that install the Claude Code plugin from that folder.
+
+## Packaging
+
+`scripts/package.js` stages the extension into `dist/stage/`: `CSXS/`, `panel/`, `shared/`, `native/AE MCP Bridge.plugin`, and `claude-plugin/`, a local marketplace holding the MCP server and engine. It then builds `dist/AE-MCP-<version>.pkg` with that folder at `/Library/Application Support/Adobe/CEP/extensions/com.ae.tools`. `scripts/pkg/postinstall` copies the bridge into each After Effects and sets `PlayerDebugMode` for the signed-in user, because the panel in the pkg is unsigned.
+
+The script refuses to run if `package.json`, `plugin.json` and `manifest.xml` disagree on the version. `.debug` is left out so releases don't open a remote-debug port. The bridge is marked non-relocatable, otherwise the installer could update a copy found elsewhere on disk instead of installing it.
 
 ## Reload
 

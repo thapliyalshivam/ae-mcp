@@ -13,6 +13,8 @@
     "enable-debug": "node scripts/enable-debug.js",
     "build-aegp": "aegp/build.sh",
     "install-aegp": "node scripts/install-aegp.js",
-    "test-bridge": "aegp/test/run.sh"
+    "test-bridge": "aegp/test/run.sh",
+    "package": "node scripts/package.js",
+    "update-bridge": "node scripts/update-bridge.js"
   }
 }

@@ -17,6 +17,10 @@ var BridgeClient = require(path.join(EXT_ROOT, 'shared', 'bridge-client.js')).Br
 
 var POLL_MS = 1000;
 var PLUGIN_NAME = 'AE MCP Bridge.plugin';
+var CLAUDE_PLUGIN = 'after-effects@ae-plugins';
+var CLAUDE_MARKETPLACE = path.join(EXT_ROOT, 'claude-plugin');
+var CLAUDE_COMMANDS = 'claude plugin marketplace add "' + CLAUDE_MARKETPLACE + '"\n' +
+  'claude plugin install ' + CLAUDE_PLUGIN;
 
 var bridge = null;
 var lastStatus = null;
@@ -83,17 +87,51 @@ function installedPlugins() {
   return found;
 }
 
+/** The bridge bundled in an installer. A dev install from `npm run deploy` doesn't carry one. */
+function bundledBridge() {
+  var bundled = path.join(EXT_ROOT, 'native', PLUGIN_NAME);
+  return fs.existsSync(bundled) ? bundled : null;
+}
+
+/** "/Applications/Adobe After Effects 2025/Plug-ins" for the After Effects running this panel. */
+function hostPluginsDir() {
+  var match = /^(.*)\/[^/]+\.app(\/|$)/.exec(csInterface.getSystemPath(SystemPath.HOST_APPLICATION));
+  return match ? path.join(match[1], 'Plug-ins') : null;
+}
+
+function claudePluginInstalled() {
+  var home = process.env.CLAUDE_CONFIG_DIR || path.join(process.env.HOME, '.claude');
+  try {
+    var installed = JSON.parse(fs.readFileSync(path.join(home, 'plugins', 'installed_plugins.json'), 'utf8'));
+    return Object.prototype.hasOwnProperty.call(installed.plugins || installed, CLAUDE_PLUGIN);
+  } catch (e) {
+    return false; // no Claude Code here, or no plugins yet
+  }
+}
+
+/** A dev install from `npm run deploy` has no bundled plugin to offer. */
+function renderClaudeSetup(sessions) {
+  $('claude-setup').hidden = sessions > 0 || !fs.existsSync(CLAUDE_MARKETPLACE) || claudePluginInstalled();
+}
+
 function renderOffline() {
   lastStatus = null;
   setPill('bad', 'Offline');
   $('offline').hidden = false;
+  renderClaudeSetup(0);
   ['btn-toggle', 'btn-reload', 'btn-test'].forEach(function (id) { $(id).disabled = true; });
   ['s-version', 's-endpoint', 's-uptime', 's-evals', 's-last', 's-running'].forEach(function (id) { $(id).textContent = '—'; });
   $('sessions').innerHTML = '<span class="empty">—</span>';
 
   var hint = $('offline-hint');
   var where = installedPlugins();
-  if (where.length === 0) {
+  var canInstall = where.length === 0 && !!bundledBridge() && !!hostPluginsDir();
+  $('btn-install').hidden = !canInstall;
+  if (canInstall) {
+    hint.innerHTML = 'The <b>AE MCP Bridge</b> plugin is not installed. Installing it asks for your ' +
+      'administrator password, and After Effects then needs a restart. Until then, Claude Code falls ' +
+      'back to AppleScript.';
+  } else if (where.length === 0) {
     hint.innerHTML = 'The <b>AE MCP Bridge</b> plugin is not installed. In <code>ae-mcp</code> run ' +
       '<code>npm run install-aegp</code>, then restart After Effects. Until then, Claude Code falls back ' +
       'to AppleScript.';
@@ -109,6 +147,7 @@ function renderStatus(s) {
   $('offline').hidden = true;
 
   var mcp = s.clients.filter(function (c) { return c.name === 'mcp'; });
+  renderClaudeSetup(mcp.length);
   if (s.listenError) setPill('bad', 'Port error');
   else if (!s.enabled) setPill('warn', 'Paused');
   else if (mcp.length === 0) setPill('warn', 'Idle · no sessions');
@@ -219,6 +258,36 @@ $('btn-reconnect').addEventListener('click', function () {
   });
 });
 
+$('btn-copy').addEventListener('click', function () {
+  var area = document.createElement('textarea');
+  area.value = CLAUDE_COMMANDS;
+  document.body.appendChild(area);
+  area.select();
+  var copied = document.execCommand('copy');
+  document.body.removeChild(area);
+  toast(copied ? 'Commands copied.' : 'Could not copy. Select the commands instead.', copied ? 'good' : 'err');
+});
+
+function shellQuote(s) {
+  return "'" + s.replace(/'/g, "'\\''") + "'";
+}
+
+$('btn-install').addEventListener('click', function () {
+  var dest = path.join(hostPluginsDir(), PLUGIN_NAME);
+  var command = 'rm -rf ' + shellQuote(dest) + ' && cp -R ' + shellQuote(bundledBridge()) + ' ' + shellQuote(dest) +
+    ' && xattr -dr com.apple.quarantine ' + shellQuote(dest);
+  var script = 'do shell script ' + JSON.stringify(command) + ' with administrator privileges';
+  var button = $('btn-install');
+  button.disabled = true;
+  require('child_process').execFile('osascript', ['-e', script], function (err) {
+    button.disabled = false;
+    if (err) { toast('The bridge was not installed: ' + err.message, 'err'); return; }
+    toast('Bridge installed. Restart After Effects to load it.', 'good');
+    poll();
+  });
+});
+
+$('claude-commands').textContent = CLAUDE_COMMANDS;
 connect();
 refreshHost();
 setInterval(poll, POLL_MS);

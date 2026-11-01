@@ -1,0 +1,74 @@
+# Every push to main that touches code tags this repo and publishes the pkg to the releases repo.
+# It packages the committed bridge in aegp/prebuilt, because the After Effects SDK isn't on GitHub.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - '.cursor/**'
+      - '.gitignore'
+
+# Two pushes in a row must not pick the same version.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  RELEASES_REPO: thapliyalshivam/ae-mcp-releases
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check syntax
+        run: |
+          for file in mcp/*.js engine/vocabulary.js shared/bridge-client.js panel/app.js scripts/*.js; do
+            node --check "$file"
+          done
+          sh -n scripts/pkg/postinstall
+
+      - name: Pick the version
+        id: version
+        run: echo "version=$(node scripts/release-version.js)" >> "$GITHUB_OUTPUT"
+
+      - name: Build the pkg
+        run: |
+          node scripts/download-cep.js
+          node scripts/package.js --prebuilt
+
+      - name: Write release notes
+        run: |
+          previous="$(git tag --list 'v*' --sort=-v:refname | head -1)"
+          if [ -n "$previous" ]; then
+            git log --format='- %s' "$previous..HEAD" > notes.md
+          else
+            echo 'First release.' > notes.md
+          fi
+
+      - name: Tag this repo
+        run: |
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+
+      - name: Publish to the releases repo
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            "dist/AE-MCP-${{ steps.version.outputs.version }}.pkg" \
+            --repo "$RELEASES_REPO" \
+            --title "AE MCP ${{ steps.version.outputs.version }}" \
+            --notes-file notes.md
