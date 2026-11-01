@@ -58,11 +58,7 @@ jobs:
             echo 'First release.' > notes.md
           fi
 
-      - name: Tag this repo
-        run: |
-          git tag "v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
-
+      # Publish first: a failed publish must not use up the version.
       - name: Publish to the releases repo
         env:
           GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
@@ -72,3 +68,8 @@ jobs:
             --repo "$RELEASES_REPO" \
             --title "AE MCP ${{ steps.version.outputs.version }}" \
             --notes-file notes.md
+
+      - name: Tag this repo
+        run: |
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
