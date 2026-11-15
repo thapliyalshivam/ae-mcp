@@ -16,9 +16,9 @@ Tested on After Effects 2025 (SDK 25.6) on macOS (arm64 and x86_64).
 
 ## Install from a release
 
-You need a Mac with After Effects, Claude Code and Node.js. You also need access to the private `thapliyalshivam/ae-mcp-releases` repo, so you need a GitHub account.
+You need a Mac with After Effects, Claude Code and Node.js.
 
-1. Download `AE-MCP-<version>.pkg` from the repo's **Releases** page.
+1. Download `AE-MCP-<version>.pkg` from this repo's **Releases** page.
 2. Open the pkg. macOS blocks it the first time because it's unsigned, so allow it in **System Settings > Privacy & Security**, then open it again.
 3. Restart After Effects and open **Window > Extensions > AE MCP**.
 4. Run the two commands the panel shows in a terminal, then start `claude`.
@@ -66,19 +66,16 @@ If `ZXPSignCmd` 4.1.3 or later is available, with `ZXP_CERT` and `ZXP_CERT_PASSW
 
 ## Releases
 
-Every push to `main` that touches code runs `.github/workflows/release.yml`. It checks syntax, builds the pkg on a GitHub macOS runner, tags this repo, and publishes the pkg to `thapliyalshivam/ae-mcp-releases` under the same tag. Pushes that only change Markdown, `.cursor/` or `.gitignore` don't release.
+Every push to `main` that touches code runs `.github/workflows/release.yml`. It checks syntax, builds the pkg on a GitHub macOS runner, and publishes it as a release of this repo, tagged with its version. Pushes that only change Markdown, `.cursor/` or `.gitignore` don't release.
 
 Do unfinished work on a branch, because everything that reaches `main` ships.
 
 ### Set up releases once
 
-1. Create the private `thapliyalshivam/ae-mcp-releases` repo with a README, because publishing needs at least one commit there.
-2. Create a fine-grained GitHub token limited to that repo, with **Contents: Read and write**.
-3. In this repo, add the token under **Settings > Secrets and variables > Actions** as `RELEASES_TOKEN`.
-4. Push to `main`. The first release is the version in `package.json`.
-5. Install that release on a second Mac or a clean user account before adding recipients.
+1. Push to `main`. The first release is the version in `package.json`.
+2. Install that release on a second Mac or a clean user account before sharing it.
 
-Recipients get access by being added to `ae-mcp-releases`. On a personal GitHub account, collaborators get write access, so use an organization if you want them read-only. Never add them to this repo, because that gives them the source.
+The workflow publishes with the built-in `GITHUB_TOKEN`, so it needs no extra secrets. Anyone who can see this repo can download its releases, and can also read the source.
 
 ### Day to day
 
