@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Run this after changing the bridge, then commit aegp/prebuilt/. It builds and tests the bridge
  * and keeps the compiled copy that CI packages, because the After Effects SDK isn't on GitHub.

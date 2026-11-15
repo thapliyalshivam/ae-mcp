@@ -1,4 +1,8 @@
 #!/bin/bash
+# AE MCP - https://shivamthapliyal.com
+# Copyright (C) 2026 Shivam Thapliyal
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Builds aegp/test/harness.cpp (the real bridge against fake AEGP suites) and runs bridge.test.js.
 set -euo pipefail
 

@@ -1,4 +1,8 @@
 #!/bin/sh
+# AE MCP - https://shivamthapliyal.com
+# Copyright (C) 2026 Shivam Thapliyal
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Runs as root after the pkg lays the extension down. Copies the bridge into every installed
 # After Effects, and lets the signed-in user's After Effects load the unsigned panel.
 EXTENSION="/Library/Application Support/Adobe/CEP/extensions/com.ae.tools"

@@ -1,3 +1,7 @@
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Runs the real AEMCPBridge.cpp outside After Effects, against fake AEGP suites, so the socket
  * server, JSON handling and main-thread hand-off can be tested without restarting AE.

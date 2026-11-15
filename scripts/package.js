@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Builds the one file users need: dist/AE-MCP-<version>.pkg. It installs the panel system-wide,
  * with the prebuilt bridge and the Claude Code plugin inside the extension folder, so neither
@@ -67,7 +71,7 @@ function versions() {
 function stage() {
   fs.rmSync(STAGE, { recursive: true, force: true });
   fs.mkdirSync(STAGE, { recursive: true });
-  ['CSXS', 'panel', 'shared'].forEach((dir) => copyInto(STAGE, dir));
+  ['CSXS', 'panel', 'shared', 'LICENSE'].forEach((item) => copyInto(STAGE, item));
 
   // The bundle's code signature seals its contents, so it goes over byte for byte.
   fs.mkdirSync(path.join(STAGE, 'native'));
@@ -76,7 +80,7 @@ function stage() {
   // A local marketplace holding only what the MCP server loads at runtime.
   const plugin = path.join(STAGE, 'claude-plugin');
   ['.claude-plugin/plugin.json', '.claude-plugin/marketplace.json', 'package.json', 'mcp', 'engine',
-    'shared/bridge-client.js'].forEach((item) => copyInto(plugin, item));
+    'shared/bridge-client.js', 'shared/design-system.js', 'LICENSE'].forEach((item) => copyInto(plugin, item));
 }
 
 /** pkgbuild marks bundles relocatable, which would move the bridge onto any copy found elsewhere. */

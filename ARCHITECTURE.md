@@ -28,7 +28,8 @@ ae-mcp/
 │   └── marketplace.json         local marketplace, source "./"
 ├── mcp/
 │   ├── server.js                MCP protocol (stdio JSON-RPC), bridge connection, reload
-│   └── tools.js                 tool definitions and transports (hot-reloadable)
+│   ├── tools.js                 tool definitions and transports (hot-reloadable)
+│   └── house-rules.md           how to build in every comp (rigging, naming); opens ae_get_context
 ├── engine/
 │   ├── engine.jsx               ExtendScript: context, preview, apply, response helpers
 │   └── vocabulary.js            OPS_SCHEMA and OP_CATALOG for the op tools
@@ -38,9 +39,10 @@ ae-mcp/
 │   ├── Info.plist
 │   ├── build.sh                 clang++ (universal) + Rez → build/AE MCP Bridge.plugin
 │   └── test/                    run.sh, harness.cpp (fake AEGP suites), bridge.test.js
-├── panel/                       CEP panel "AE MCP": index.html, app.js, panel.jsx
+├── panel/                       CEP panel "AE MCP": index.html, app.js, panel.jsx, tokens.css (design tokens), panel.css, fonts/ (OFL)
 ├── shared/
 │   ├── bridge-client.js         bridge client used by both server.js and the panel
+│   ├── design-system.js         the active design system .md: chosen in the panel, read by tools.js
 │   └── CSInterface.js           downloaded by setup, not committed
 ├── CSXS/manifest.xml            the one extension, com.ae.tools.mcp
 ├── .debug                       CEP remote-debug port (8800) for the panel
@@ -53,7 +55,8 @@ ae-mcp/
 
 | Tool | What it does | Changes the project? |
 |---|---|---|
-| `ae_get_context` | Outlines the selected layers, or the whole comp (up to 80 layers) when nothing is selected. Each layer line ends with its id (`#L12`). | No |
+| `ae_get_context` | Opens with the house rules (`mcp/house-rules.md`, how to build in every comp) and the active design system (each in full the first time in a session and when its file changes, otherwise one line). Then outlines the selected layers, or the whole comp (up to 80 layers) when nothing is selected. Each layer line ends with its id (`#L12`). | No |
+| `ae_get_design_system` | Returns the house rules and the active design system in full. Doesn't need After Effects. | No |
 | `ae_preview_ops` | Checks a list of ops against the live comp and returns one before → after row per op. It marks refused ops and tags structural ones. | No |
 | `ae_apply_ops` | Re-runs preview, then applies only the ops that passed, in one undo group. | Yes |
 | `ae_run_script` | Runs any ExtendScript function body in one undo group and returns its `return` value as a string. It has no preview. | Yes |

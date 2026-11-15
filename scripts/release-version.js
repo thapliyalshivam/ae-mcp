@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Picks the next release version and stamps it into the working tree, for CI. Tags are the record
  * of what shipped, so these stamps are never committed.

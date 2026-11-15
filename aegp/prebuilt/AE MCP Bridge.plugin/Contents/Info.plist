@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  AE MCP - https://shivamthapliyal.com
+  Copyright (C) 2026 Shivam Thapliyal
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
 <plist version="1.0">
 <dict>
 	<key>CFBundleExecutable</key>
@@ -16,6 +21,8 @@
 	<string>FXTC</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright (C) 2026 Shivam Thapliyal. GPL-3.0-or-later. https://shivamthapliyal.com</string>
 	<key>LSRequiresCarbon</key>
 	<true/>
 </dict>

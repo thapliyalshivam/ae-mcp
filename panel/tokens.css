@@ -1,0 +1,142 @@
+/*
+ * AE MCP - https://shivamthapliyal.com
+ * Copyright (C) 2026 Shivam Thapliyal
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/* ==========================================================================
+   Design tokens: the single source of truth for visual values in the panel.
+   Components reference these variables. Never hard-code a colour, size,
+   radius or duration. Usage rules: .claude/rules/design-system.md
+
+   CEP in After Effects 2025 is Chromium 99: no color-mix(), :has() or
+   container queries. Tints are written out per theme as rgba().
+   ========================================================================== */
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("fonts/PlusJakartaSans-latin-wght.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url("fonts/DMSans-latin-wght.woff2") format("woff2-variations");
+}
+
+:root {
+  color-scheme: light;
+
+  /* ---------- Colour · neutrals (ink on paper) ---------- */
+  --color-paper: #ffffff;           /* raised surfaces             */
+  --color-paper-soft: #f9f9f9;      /* panel background            */
+  --color-surface-sunken: #f3f3f3;  /* chips, code, placeholders   */
+  --color-surface-strong: #e8e8e8;  /* hover on sunken surfaces    */
+  --color-line: #e8e8e8;            /* hairlines                   */
+  --color-rule: rgba(0, 0, 0, 0.07);/* section rules: ink at 7%    */
+
+  --color-ink: #000000;             /* headings, outlines, solid   */
+  --color-ink-strong: #232323;      /* values, emphasised text     */
+  --color-ink-muted: #505050;       /* body copy                   */
+  --color-ink-faint: #969696;       /* labels, inactive, meta      */
+  --color-ink-ghost: #c1c1c1;       /* big grey type               */
+  --color-ink-inverse: #f9f9f9;     /* text on solid ink           */
+
+  /* ---------- Colour · accent ---------- */
+  --color-accent: #d4ff2b;          /* lime. Tiny markers, ::selection. Use sparingly. */
+  --color-accent-ink: #000000;      /* text on accent              */
+  --color-accent-ring: rgba(0, 0, 0, 0.35); /* edge for lime marks on light paper */
+
+  /* ---------- Colour · status ---------- */
+  --color-danger: #c4124f;          /* errors only: text and the status dot */
+
+  /* ---------- Typography ---------- */
+  --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Fixed sizes: a dock panel doesn't need fluid type. */
+  --text-h3: 1.5rem;      /* 24  status headline    */
+  --text-body: 1rem;      /* 16                     */
+  --text-sm: 0.875rem;    /* 14  default panel text */
+  --text-xs: 0.75rem;     /* 12  log rows, meta     */
+
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+
+  --tracking-heading: -0.014em;
+  --tracking-ui: 0.01em;
+
+  /* ---------- Space (4px base) ---------- */
+  --space-0: 0;
+  --space-1: 0.25rem;  /* 4  */
+  --space-2: 0.5rem;   /* 8  */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.5rem;   /* 24 */
+  --space-6: 2rem;     /* 32 */
+
+  --gutter: var(--space-4);          /* panel edge padding */
+  --section-gap: var(--space-5);     /* air between sections, split around the rule */
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 0.5rem;     /* 8  focus rings, code blocks */
+  --radius-md: 1.25rem;    /* 20 cards, media             */
+  --radius-pill: 999px;    /* every button, chip and tag  */
+
+  /* ---------- Border ---------- */
+  --border-hairline: 1px solid var(--color-line);
+  --border-ink: 1px solid var(--color-ink);
+  --border-rule: 1px solid var(--color-rule);
+
+  /* ---------- Motion ---------- */
+  --duration-instant: 100ms;  /* press feedback        */
+  --duration-fast: 200ms;     /* hover, small UI       */
+  --duration-base: 400ms;     /* standard enter        */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);    /* state changes */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);      /* entrances     */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);  /* exits, swaps  */
+  --press-scale: 0.96;
+}
+
+/* Dark theme: neutrals only. The accent stays put. The panel sets data-theme
+   on <html> from After Effects' own interface brightness. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-paper: #181818;
+  --color-paper-soft: #101010;
+  --color-surface-sunken: #1e1e1e;
+  --color-surface-strong: #2a2a2a;
+  --color-line: #2a2a2a;
+  --color-rule: rgba(255, 255, 255, 0.07);
+
+  --color-ink: #ffffff;
+  --color-ink-strong: #ececec;
+  --color-ink-muted: #b4b4b4;
+  --color-ink-faint: #7a7a7a;
+  --color-ink-ghost: #5a5a5a;
+  --color-ink-inverse: #101010;
+
+  --color-accent-ring: transparent;
+  --color-danger: #ff6980;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --press-scale: 1;
+  }
+}

@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Builds the AE MCP Bridge and installs it into the newest
  * "/Applications/Adobe After Effects <year>/Plug-ins" (or AE_APP's). That folder is owned by

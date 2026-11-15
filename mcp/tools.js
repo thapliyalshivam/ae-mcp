@@ -1,3 +1,7 @@
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * The After Effects tools. Everything that can change while a session runs lives here, so the
  * server can drop this module (and engine/vocabulary.js) from require's cache and load it again
@@ -11,10 +15,13 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFile } = require('child_process');
+const designSystem = require('../shared/design-system');
 
 const ROOT = path.resolve(__dirname, '..');
 const ENGINE_PATH = path.join(ROOT, 'engine', 'engine.jsx');
 const VOCABULARY_PATH = path.join(ROOT, 'engine', 'vocabulary.js');
+/** How to build in every comp, shipped with the plugin. The design system says how things look. */
+const HOUSE_RULES_PATH = path.join(__dirname, 'house-rules.md');
 
 /**
  * Escape every non-ASCII character to \uXXXX: the trip into ExtendScript mangles them otherwise.
@@ -141,9 +148,58 @@ function createTools({ bridge }) {
     }).join('\n');
   }
 
+  /** path:mtime of the design system text this session last sent, so it isn't resent every call. */
+  let sentDesignSystem = null;
+
+  /** The design system block that opens ae_get_context. force sends the full text again. */
+  function designSystemText(force) {
+    const ds = designSystem.load();
+    if (!ds) {
+      return 'Design system: none. No brand rules apply. The user can choose one in the AE MCP panel.';
+    }
+    if (ds.error) {
+      return 'Design system: ' + ds.path + ' could not be read (' + ds.error + '). Tell the user, and ask ' +
+        'before editing without it.';
+    }
+    const key = ds.path + ':' + ds.mtimeMs;
+    if (!force && key === sentDesignSystem) {
+      return 'Design system: ' + ds.name + ' (unchanged, sent earlier in this session; call ' +
+        'ae_get_design_system to read it again). Its rules still apply.';
+    }
+    sentDesignSystem = key;
+    const note = ds.missing.length
+      ? '\nNote: the file is missing these sections: ' + ds.missing.join(', ') + '.'
+      : '';
+    return 'Design system: ' + ds.name + ' (' + ds.path + ').\n' +
+      'Follow it as hard rules for every edit: use only its tokens, and when it has no value for ' +
+      'something, ask the user instead of inventing one.' + note + '\n\n' +
+      '----- design system -----\n' + ds.text.trim() + '\n----- end of design system -----';
+  }
+
+  /** mtime of the house rules this session last sent, so they aren't resent every call. */
+  let sentHouseRules = null;
+
+  /** The house rules block that opens ae_get_context. force sends the full text again. */
+  function houseRulesText(force) {
+    let text, mtimeMs;
+    try {
+      text = fs.readFileSync(HOUSE_RULES_PATH, 'utf8');
+      mtimeMs = fs.statSync(HOUSE_RULES_PATH).mtimeMs;
+    } catch (e) {
+      return 'House rules: ' + HOUSE_RULES_PATH + ' could not be read (' + e.message + ').';
+    }
+    if (!force && mtimeMs === sentHouseRules) {
+      return 'House rules: unchanged, sent earlier in this session (call ae_get_design_system to read ' +
+        'them again). They still apply.';
+    }
+    sentHouseRules = mtimeMs;
+    return 'House rules: how to build in every comp. Follow them as hard rules.\n\n' +
+      '----- house rules -----\n' + text.trim() + '\n----- end of house rules -----';
+  }
+
   async function getContext() {
     const result = await callAe('claudeGetContext()', 'ae_get_context');
-    return result.data;
+    return houseRulesText(false) + '\n\n' + designSystemText(false) + '\n\n' + result.data;
   }
 
   async function previewOps(ops) {
@@ -231,6 +287,17 @@ function createTools({ bridge }) {
       inputSchema: { type: 'object', properties: {}, additionalProperties: false },
       annotations: { title: 'Read AE comp', readOnlyHint: true },
       run: () => getContext()
+    },
+    {
+      name: 'ae_get_design_system',
+      description:
+        'Read the house rules (how to build in every comp) and the active design system (the brand ' +
+        'rules the user chose in the AE MCP panel) in full. ae_get_context already includes both the ' +
+        'first time and whenever they change; call this when you need them again. Read-only, and ' +
+        'works without After Effects.',
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      annotations: { title: 'Read design system', readOnlyHint: true },
+      run: async () => houseRulesText(true) + '\n\n' + designSystemText(true)
     },
     {
       name: 'ae_preview_ops',

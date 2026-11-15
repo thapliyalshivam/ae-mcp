@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * After Effects MCP server — exposes the engine (engine/engine.jsx) to Claude Code as tools.
  *
@@ -26,7 +30,10 @@ const INSTRUCTIONS =
   'Edits the active Adobe After Effects comp through a fixed op vocabulary. Workflow: ' +
   'ae_get_context → ae_preview_ops → show the rows to the user → ae_apply_ops with the ops they ' +
   'approved. Anything the ops cannot express, say so rather than forcing a wrong op. If a call ' +
-  'fails to reach After Effects, ae_status says why.';
+  'fails to reach After Effects, ae_status says why. Call ae_get_context first: it opens with the ' +
+  'house rules (how to build: rig with CTRL_ nulls, parent before keying) and the active design ' +
+  'system (brand tokens), if the user chose one. Follow both as hard rules, use only the design ' +
+  'system\'s tokens, and ask when it has no value for something.';
 
 const bridge = new BridgeClient({
   hello: {

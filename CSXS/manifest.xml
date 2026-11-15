@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  AE MCP - https://shivamthapliyal.com
+  Copyright (C) 2026 Shivam Thapliyal
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
 <ExtensionManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    ExtensionBundleId="com.ae.tools"
                    ExtensionBundleVersion="2.0.0"

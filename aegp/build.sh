@@ -1,4 +1,8 @@
 #!/bin/bash
+# AE MCP - https://shivamthapliyal.com
+# Copyright (C) 2026 Shivam Thapliyal
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Builds "AE MCP Bridge.plugin" (universal arm64 + x86_64) from the After Effects SDK.
 #   AE_SDK=/path/to/Examples ./build.sh
 set -euo pipefail

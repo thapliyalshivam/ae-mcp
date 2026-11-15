@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Full setup: download CSInterface.js, enable debug mode, deploy the panel, build and install
  * the AEGP bridge. Use `npm run setup` to invoke.

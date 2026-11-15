@@ -1,6 +1,6 @@
 {
   "name": "ae-plugins",
-  "owner": { "name": "Shivam" },
+  "owner": { "name": "Shivam Thapliyal", "url": "https://shivamthapliyal.com" },
   "plugins": [
     {
       "name": "after-effects",

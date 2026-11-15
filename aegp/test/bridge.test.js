@@ -1,3 +1,7 @@
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Drives the harness (aegp/test/harness.cpp) through shared/bridge-client.js — the same client
  * the MCP server and panel use. Run via aegp/test/run.sh.

@@ -1,87 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  AE MCP - https://shivamthapliyal.com
+  Copyright (C) 2026 Shivam Thapliyal
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <title>AE MCP</title>
-  <style>
-    :root {
-      --bg: #232323;
-      --panel: #2b2b2b;
-      --line: #3a3a3a;
-      --text: #d6d6d6;
-      --muted: #8c8c8c;
-      --accent: #4f8ff7;
-      --ok: #3fbf6f;
-      --warn: #e0a83a;
-      --bad: #e0564f;
-    }
-    * { box-sizing: border-box; }
-    [hidden] { display: none !important; }
-    body {
-      margin: 0;
-      padding: 10px;
-      background: var(--bg);
-      color: var(--text);
-      font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      user-select: none;
-    }
-    header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    header h1 { font-size: 13px; margin: 0; font-weight: 600; flex: 1; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;
-      background: var(--panel); border: 1px solid var(--line);
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-    .pill.ok .dot { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
-    .pill.warn .dot { background: var(--warn); }
-    .pill.bad .dot { background: var(--bad); }
-
-    section { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px; margin-bottom: 8px; }
-    section h2 { margin: 0 0 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
-    .grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; }
-    .grid .k { color: var(--muted); }
-    .grid .v { text-align: right; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
-    button {
-      background: #3a3a3a; color: var(--text); border: 1px solid #4a4a4a; border-radius: 3px;
-      padding: 6px 8px; font: inherit; cursor: pointer;
-    }
-    button:hover:not(:disabled) { background: #444; }
-    button:disabled { opacity: .45; cursor: default; }
-    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    button.primary:hover:not(:disabled) { background: #6aa0f8; }
-
-    .list { display: flex; flex-direction: column; gap: 4px; }
-    .row { display: flex; gap: 6px; align-items: baseline; }
-    .row .main { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .row .side { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .tag { font-size: 10px; padding: 0 5px; border-radius: 3px; background: #3a3a3a; color: var(--muted); }
-    .tag.mcp { background: rgba(79,143,247,.18); color: #8db5fa; }
-    .err { color: var(--bad); }
-    .empty, .hint { color: var(--muted); }
-    .hint code { background: #1c1c1c; padding: 1px 4px; border-radius: 2px; color: var(--text); }
-    #toast { min-height: 16px; color: var(--muted); margin-bottom: 8px; }
-    #toast.err { color: var(--bad); }
-    #toast.good { color: var(--ok); }
-    button.block { display: block; width: 100%; margin-top: 8px; }
-    pre {
-      margin: 8px 0 0; padding: 6px; background: #1c1c1c; border-radius: 2px; overflow-x: auto;
-      font: 11px/1.5 Menlo, monospace; user-select: text;
-    }
-    .log { max-height: 220px; overflow-y: auto; }
-    .log .row { font-size: 11px; }
-  </style>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="panel.css">
 </head>
 <body>
-  <header>
-    <h1>AE MCP</h1>
-    <span id="pill" class="pill"><span class="dot"></span><span id="pill-text">Checking…</span></span>
+  <header id="status" class="status">
+    <p class="eyebrow">AE MCP</p>
+    <h1 class="headline" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="status-main">Checking…</span><span id="status-sub" class="sub"></span></h1>
   </header>
 
   <div class="actions">
-    <button id="btn-toggle" class="primary" disabled>Pause</button>
+    <button id="btn-toggle" disabled>Pause</button>
     <button id="btn-reload" disabled title="MCP sessions re-read tools.js, vocabulary.js and engine.jsx">Reload MCP</button>
     <button id="btn-test" disabled title="Run a tiny script through the bridge and time it">Test round-trip</button>
     <button id="btn-reconnect" title="Drop and reopen this panel's bridge connection">Reconnect</button>
@@ -91,7 +28,7 @@
   <section id="offline" hidden>
     <h2>Bridge offline</h2>
     <div class="hint" id="offline-hint"></div>
-    <button id="btn-install" class="primary block" hidden>Install bridge</button>
+    <button id="btn-install" class="solid block" hidden>Install bridge</button>
   </section>
 
   <section id="claude-setup" hidden>
@@ -99,6 +36,16 @@
     <div class="hint">The After Effects plugin for Claude Code isn't installed. Run this in a terminal, then start <code>claude</code>:</div>
     <pre id="claude-commands"></pre>
     <button id="btn-copy" class="block">Copy commands</button>
+  </section>
+
+  <section id="design-system">
+    <h2>Design system</h2>
+    <p class="ds-name" id="ds-name">None</p>
+    <p class="ds-detail" id="ds-detail">Claude Code follows no brand rules. Choose a design system .md to set them.</p>
+    <div class="ds-actions">
+      <button id="btn-ds-choose" title="Pick a design system Markdown file. Claude Code reads it on its next call.">Choose .md</button>
+      <button id="btn-ds-remove" hidden>Remove</button>
+    </div>
   </section>
 
   <section>
@@ -131,6 +78,11 @@
       <span class="k">Active comp</span><span class="v" id="h-comp">—</span>
     </div>
   </section>
+
+  <footer class="credit">
+    <a id="credit-link" href="https://shivamthapliyal.com">Made by Shivam Thapliyal</a>
+    <span>GPL-3.0</span>
+  </footer>
 
   <script src="../shared/CSInterface.js"></script>
   <script src="app.js"></script>

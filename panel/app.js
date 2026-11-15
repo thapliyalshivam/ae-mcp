@@ -1,3 +1,7 @@
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /* global CSInterface, SystemPath */
 /**
  * AE MCP panel — status and controls for the AE MCP Bridge AEGP plugin and the Claude Code
@@ -14,6 +18,7 @@ var path = require('path');
 
 var EXT_ROOT = csInterface.getSystemPath(SystemPath.EXTENSION);
 var BridgeClient = require(path.join(EXT_ROOT, 'shared', 'bridge-client.js')).BridgeClient;
+var designSystem = require(path.join(EXT_ROOT, 'shared', 'design-system.js'));
 
 var POLL_MS = 1000;
 var PLUGIN_NAME = 'AE MCP Bridge.plugin';
@@ -68,9 +73,22 @@ function toast(message, kind) {
 
 /* ---------------------------------------------------------------- render */
 
-function setPill(kind, text) {
-  $('pill').className = 'pill ' + kind;
-  $('pill-text').textContent = text;
+/** The headline: black state over a grey detail line. kind is ok | warn | bad. */
+function setStatus(kind, main, sub) {
+  $('status').className = 'status ' + kind;
+  $('status-main').textContent = main;
+  $('status-sub').textContent = sub || '';
+}
+
+/** Follow After Effects' interface brightness (Preferences > Appearance). */
+function applyTheme() {
+  var theme = 'dark';
+  try {
+    var c = csInterface.getHostEnvironment().appSkinInfo.panelBackgroundColor.color;
+    var luminance = (0.2126 * c.red + 0.7152 * c.green + 0.0722 * c.blue) / 255;
+    theme = luminance > 0.5 ? 'light' : 'dark';
+  } catch (e) { /* no skin info: keep dark, AE's default */ }
+  document.documentElement.setAttribute('data-theme', theme);
 }
 
 function installedPlugins() {
@@ -116,7 +134,7 @@ function renderClaudeSetup(sessions) {
 
 function renderOffline() {
   lastStatus = null;
-  setPill('bad', 'Offline');
+  setStatus('bad', 'Offline', 'Bridge not reachable');
   $('offline').hidden = false;
   renderClaudeSetup(0);
   ['btn-toggle', 'btn-reload', 'btn-test'].forEach(function (id) { $(id).disabled = true; });
@@ -148,15 +166,15 @@ function renderStatus(s) {
 
   var mcp = s.clients.filter(function (c) { return c.name === 'mcp'; });
   renderClaudeSetup(mcp.length);
-  if (s.listenError) setPill('bad', 'Port error');
-  else if (!s.enabled) setPill('warn', 'Paused');
-  else if (mcp.length === 0) setPill('warn', 'Idle · no sessions');
-  else setPill('ok', 'Active · ' + mcp.length + ' session' + (mcp.length === 1 ? '' : 's'));
+  if (s.listenError) setStatus('bad', 'Port error', 'Port ' + s.port + ' unavailable');
+  else if (!s.enabled) setStatus('warn', 'Paused', 'Claude Code calls are refused');
+  else if (mcp.length === 0) setStatus('warn', 'Idle', 'No sessions');
+  else setStatus('ok', 'Active', mcp.length + ' session' + (mcp.length === 1 ? '' : 's'));
 
   var toggle = $('btn-toggle');
   toggle.disabled = false;
   toggle.textContent = s.enabled ? 'Pause' : 'Resume';
-  toggle.className = s.enabled ? '' : 'primary';
+  toggle.className = s.enabled ? '' : 'solid';
   $('btn-reload').disabled = mcp.length === 0;
   $('btn-test').disabled = !s.enabled;
 
@@ -204,6 +222,38 @@ function refreshHost() {
     $('h-project').textContent = info.project;
     $('h-comp').textContent = info.comp || 'none';
   });
+}
+
+/** The design system section. Reads the file each time, so a move or an edit shows up. */
+function renderDesignSystem() {
+  var ds = designSystem.load();
+  var name = $('ds-name');
+  var detail = $('ds-detail');
+  $('btn-ds-remove').hidden = !ds;
+  $('btn-ds-choose').textContent = ds ? 'Change' : 'Choose .md';
+  name.className = 'ds-name';
+  detail.className = 'ds-detail';
+  detail.title = '';
+
+  if (!ds) {
+    name.textContent = 'None';
+    detail.textContent = 'Claude Code follows no brand rules. Choose a design system .md to set them.';
+    return;
+  }
+  detail.title = ds.path;
+  if (ds.error) {
+    name.textContent = path.basename(ds.path);
+    name.className = 'ds-name err';
+    detail.textContent = ds.error + ' Choose the file again.';
+    return;
+  }
+  name.textContent = ds.name;
+  if (ds.missing.length) {
+    detail.className = 'ds-detail err';
+    detail.textContent = 'Missing sections: ' + ds.missing.join(', ') + '. Claude Code still reads it.';
+  } else {
+    detail.textContent = path.basename(ds.path) + ' · Claude Code follows it on every edit.';
+  }
 }
 
 /* ---------------------------------------------------------------- polling */
@@ -287,8 +337,51 @@ $('btn-install').addEventListener('click', function () {
   });
 });
 
+$('btn-ds-choose').addEventListener('click', function () {
+  var current = designSystem.chosenPath();
+  var start = current ? path.dirname(current) : process.env.HOME;
+  var result = window.cep.fs.showOpenDialogEx(false, false, 'Choose a design system', start, ['md']);
+  if (result.err || !result.data || !result.data.length) return; // cancelled
+  var chosen = result.data[0];
+  var text;
+  try { text = fs.readFileSync(chosen, 'utf8'); } catch (e) {
+    toast('Could not read that file: ' + e.message, 'err');
+    return;
+  }
+  if (!/\.md$/i.test(chosen) || !text.trim()) {
+    toast('Choose a Markdown (.md) file that has content.', 'err');
+    return;
+  }
+  try { designSystem.choose(chosen); } catch (e) {
+    toast('Could not save the choice: ' + e.message, 'err');
+    return;
+  }
+  renderDesignSystem();
+  var missing = designSystem.missingSections(text);
+  toast(missing.length
+    ? 'Design system set, but it is missing ' + missing.length + ' section(s). See .claude/rules/design-system-files.md.'
+    : 'Design system set. Claude Code uses ' + designSystem.nameOf(text, chosen) + ' from its next call.',
+    missing.length ? 'err' : 'good');
+});
+
+$('btn-ds-remove').addEventListener('click', function () {
+  designSystem.clear();
+  renderDesignSystem();
+  toast('Design system removed. Claude Code follows no brand rules.', 'good');
+});
+
+/* A link would load inside the panel. Open it in the default browser instead. */
+$('credit-link').addEventListener('click', function (e) {
+  e.preventDefault();
+  csInterface.openURLInDefaultBrowser(this.href);
+});
+
 $('claude-commands').textContent = CLAUDE_COMMANDS;
+applyTheme();
+renderDesignSystem();
+csInterface.addEventListener(CSInterface.THEME_COLOR_CHANGED_EVENT, applyTheme);
 connect();
 refreshHost();
 setInterval(poll, POLL_MS);
 setInterval(refreshHost, 5000);
+setInterval(renderDesignSystem, 5000);

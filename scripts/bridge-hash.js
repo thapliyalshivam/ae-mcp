@@ -1,3 +1,7 @@
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Fingerprint of the bridge's sources. aegp/prebuilt/SOURCE.sha256 records the one the committed
  * bridge was built from, so a release can't ship a bridge older than its C++.

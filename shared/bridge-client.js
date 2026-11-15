@@ -1,3 +1,7 @@
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Client for the AE MCP Bridge AEGP plugin (aegp/AEMCPBridge.cpp), shared by mcp/server.js and
  * the CEP panel. One JSON object per line over 127.0.0.1:<port>; replies echo the request id.

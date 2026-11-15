@@ -110,13 +110,15 @@ Recipients get access by being added to `ae-mcp-releases`. On a personal GitHub 
 | **Reconnect** | Reopens the panel's own bridge connection |
 | Sessions / Activity | Each connected `claude` session (pid, project folder, call count) and the last 40 calls with their duration and any errors |
 | **Install bridge** | Shown when the bridge is missing and the installer bundled one. It copies the bridge into the running After Effects, which asks for an admin password. |
+| **Design system** | The brand rules Claude Code follows. **Choose .md** picks a design system file (see `Designsystem/`), **Remove** clears it. It shows the name, and warns if the file is missing or lacks a required section. |
 | **Connect Claude Code** | Shown when an installed release can't find the Claude Code plugin. It lists the install commands and has a **Copy commands** button. |
 
 ## MCP tools
 
 | Tool | Changes the project? |
 |---|---|
-| `ae_get_context` | No |
+| `ae_get_context` | No. It opens with the house rules (`mcp/house-rules.md`) and the active design system: each in full the first time in a session and whenever its file changes, a one-line reminder otherwise. |
+| `ae_get_design_system` | No. It returns the house rules and the active design system in full. |
 | `ae_preview_ops` | No |
 | `ae_apply_ops` | Yes. It runs as one undo group, and ops that fail preview are skipped. |
 | `ae_run_script` | Yes. It runs any ExtendScript with no preview, for what the ops can't express. It runs as one undo group, and **Pause** blocks it. |
@@ -126,6 +128,25 @@ Recipients get access by being added to `ae-mcp-releases`. On a personal GitHub 
 
 See `ARCHITECTURE.md` for the protocol and how to add an op.
 
+## Design systems
+
+A design system is one Markdown file of brand tokens and rules: colour, motion, typography, layout and hard rules, in that order. `Designsystem/design-shivam.md` is an example, and `.claude/rules/design-system-files.md` says how to write one.
+
+Choose the file in the panel. Its path is saved to `~/Library/Application Support/AE MCP/design-system.json`, and every Claude Code session reads the file from there, so edits to the Markdown apply on the next call without choosing it again. `AE_MCP_DESIGN_SYSTEM=/path/to/file.md` overrides the choice for one session.
+
 ## ExtendScript constraints
 
 ExtendScript is **ES3**: no `JSON`, `const`/`let`, arrow functions or `forEach`. Wrap edits in `app.beginUndoGroup()` / `app.endUndoGroup()`. Layer indices are 1-based, so address layers by `layer.id`.
+
+## Debugging
+
+- **Panel HTML/JS:** open `localhost:8800` in Chrome while the panel is open. The port is set in `.debug`.
+- **ExtendScript:** attach ExtendScript Toolkit (or the VS Code ExtendScript Debugger) to After Effects and log with `$.writeln()`.
+
+## Author and license
+
+Made by **Shivam Thapliyal** · [shivamthapliyal.com](https://shivamthapliyal.com)
+
+Copyright (C) 2026 Shivam Thapliyal. AE MCP is free software under the [GNU General Public License v3.0 or later](LICENSE). You may share and change it, but anything you distribute that is built on it must stay under the GPL, with its source available and this notice kept.
+
+The bundled fonts, Plus Jakarta Sans and DM Sans, are under the SIL Open Font License 1.1 (`panel/fonts/`). After Effects and its SDK belong to Adobe and are not part of this project.

@@ -1,3 +1,7 @@
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * AE MCP panel — ExtendScript side. Read-only facts the bridge can't see from its socket.
  * ES3 only; replies are JSON strings built by hand.

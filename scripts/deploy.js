@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// AE MCP - https://shivamthapliyal.com
+// Copyright (C) 2026 Shivam Thapliyal
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Copies the AE MCP panel into the CEP extensions folder so After Effects can load it.
  * Only what the panel needs goes over: the MCP server and the engine run from this folder.
@@ -18,7 +22,7 @@ const DEST = path.join(
   EXT_ID
 );
 
-const INCLUDE = ['CSXS', 'panel', 'shared', '.debug'];
+const INCLUDE = ['CSXS', 'panel', 'shared', '.debug', 'LICENSE'];
 const IGNORE = new Set(['.DS_Store', '.gitkeep']);
 
 function copyDir(src, dest) {
